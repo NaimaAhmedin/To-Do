@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 
 function LandingPage() {
   return (
@@ -36,9 +36,7 @@ function LandingPage() {
       {/* Decorative Elements */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-purple-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-pink-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
-      <div className="absolute top-1/3 left-1/4 w-72 h-72 bg-blue-500 rounded-full blur-2xl opacity-30 animate-spin-slow"></div>
-      <div className="absolute bottom-1/3 right-1/4 w-72 h-72 bg-yellow-500 rounded-full blur-2xl opacity-30 animate-spin-slow-reverse"></div>
-
+      
       {/* Footer */}
       <footer className="absolute bottom-0 w-full text-center py-4 bg-gray-900 bg-opacity-80 z-10">
         <p className="text-sm font-light text-gray-400">

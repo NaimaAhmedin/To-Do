@@ -2,13 +2,13 @@ import React from 'react';
 
 function SignInPage() {
   return (
-    <div className="h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black flex items-center justify-center text-white overflow-hidden">
+    <div className="h-screen bg-gray-900 flex items-center justify-center text-white overflow-hidden">
       <div className="bg-gray-800 text-gray-200 rounded-lg shadow-2xl p-8 w-full max-w-md relative">
         {/* Decorative Glow */}
         <div className="absolute -top-10 -left-10 w-32 h-32 bg-purple-500 rounded-full blur-3xl opacity-30 animate-pulse"></div>
         <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-pink-500 rounded-full blur-3xl opacity-30 animate-pulse"></div>
 
-        {/* Heading  */}
+        {/* Heading */}
         <h1 className="text-3xl font-bold text-center mb-6 text-purple-400">
           Welcome Back!
         </h1>
@@ -51,9 +51,9 @@ function SignInPage() {
 
         {/* Divider */}
         <div className="flex items-center my-6">
-          <div className="flex-grow border-t border-gray-600"></div>
+          <div className="grow border-t border-gray-600"></div>
           <span className="mx-4 text-gray-400">OR</span>
-          <div className="flex-grow border-t border-gray-600"></div>
+          <div className="grow border-t border-gray-600"></div>
         </div>
 
         {/* Google Button */}

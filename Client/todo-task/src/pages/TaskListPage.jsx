@@ -54,8 +54,7 @@ function TaskListPage() {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black text-white flex flex-col items-center p-6">
-      {/* Header */}
+<div className="h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black text-white flex flex-col items-center p-6">      {/* Header */}
       <header className="w-full max-w-6xl flex justify-between items-center mb-8">
         {/* Logo */}
         <h1 className="text-4xl font-extrabold text-purple-400">To-Do App</h1>
@@ -99,7 +98,7 @@ function TaskListPage() {
       </header>
 
       {/* Task Input  */}
-      <div className="w-full max-w-4xl flex items-center my-6">
+      <div className="w-full max-w-4xl flex items-center my-8">
         <input
           type="text"
           value={newTask}
