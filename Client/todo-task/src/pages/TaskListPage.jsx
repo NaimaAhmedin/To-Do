@@ -1,32 +1,138 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaEdit, FaTrash } from 'react-icons/fa'; // Import icons
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaEdit, FaTrash } from "react-icons/fa"; // Import icons
 import { FaRegCircleUser } from "react-icons/fa6";
+import axios from "axios";
+
 function TaskListPage() {
   const [tasks, setTasks] = useState([]);
-  const [newTask, setNewTask] = useState('');
+  const [newTask, setNewTask] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
-  const [editingIndex, setEditingIndex] = useState(null); // Track the task being edited
-  const [editingText, setEditingText] = useState(''); // Track the new text for the task
+  const [editingTaskId, setEditingTaskId] = useState(null); // Track the task being edited
+  const [editingText, setEditingText] = useState(""); // Track the new text for the task
+  const [profile, setProfile] = useState({ name: "", email: "" }); // Track the user's profile
   const navigate = useNavigate();
 
-  const addTask = () => {
+  const token = localStorage.getItem("token"); // Retrieve the JWT token from localStorage
+
+  // Fetch tasks from the backend
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/tasks/", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setTasks(response.data);
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      }
+    };
+
+    fetchTasks();
+  }, [token]);
+
+  // Fetch user profile from the backend
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/users/profile",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setProfile(response.data); // Update profile state with user data
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+
+    fetchProfile();
+  }, [token]);
+  // Add a new task
+  const addTask = async () => {
     if (newTask.trim()) {
-      setTasks([...tasks, { text: newTask, completed: false }]);
-      setNewTask('');
+      try {
+        const response = await axios.post(
+          "http://localhost:5000/api/tasks/",
+          { title: newTask, completed: false },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setTasks([...tasks, response.data]);
+        setNewTask("");
+      } catch (error) {
+        console.error("Error adding task:", error);
+      }
     }
   };
 
-  const deleteTask = (index) => {
-    setTasks(tasks.filter((_, i) => i !== index));
+  // Delete a task
+  const deleteTask = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/tasks/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setTasks(tasks.filter((task) => task._id !== id));
+    } catch (error) {
+      console.error("Error deleting task:", error);
+    }
   };
 
-  const toggleComplete = (index) => {
-    setTasks(
-      tasks.map((task, i) =>
-        i === index ? { ...task, completed: !task.completed } : task
-      )
-    );
+  // Update a task
+  const updateTask = async (id) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/tasks/${id}`,
+        { title: editingText },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setTasks(
+        tasks.map((task) =>
+          task._id === id ? { ...task, title: response.data.title } : task
+        )
+      );
+      setEditingTaskId(null);
+      setEditingText("");
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
+  };
+
+  const toggleComplete = async (id, completed) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/tasks/${id}`,
+        { completed: !completed },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setTasks(
+        tasks.map((task) =>
+          task._id === id
+            ? { ...task, completed: response.data.completed }
+            : task
+        )
+      );
+    } catch (error) {
+      console.error("Error toggling task completion:", error);
+    }
   };
 
   const toggleDropdown = () => {
@@ -34,27 +140,24 @@ function TaskListPage() {
   };
 
   const logout = () => {
-    console.log('Logout clicked');
-    navigate('/'); // Redirect to the LandingPage
+    localStorage.removeItem("token"); // Remove the token from localStorage
+    navigate("/"); // Redirect to the LandingPage
   };
 
-  const startEditing = (index) => {
-    setEditingIndex(index);
-    setEditingText(tasks[index].text);
+  const startEditing = (id, text) => {
+    setEditingTaskId(id);
+    setEditingText(text);
   };
 
   const saveEdit = () => {
-    setTasks(
-      tasks.map((task, i) =>
-        i === editingIndex ? { ...task, text: editingText } : task
-      )
-    );
-    setEditingIndex(null);
-    setEditingText('');
+    if (editingTaskId) {
+      updateTask(editingTaskId);
+    }
   };
 
   return (
-<div className="h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black text-white flex flex-col items-center p-6">      {/* Header */}
+    <div className="h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black text-white flex flex-col items-center p-6">
+      {/* Header */}
       <header className="w-full max-w-6xl flex justify-between items-center mb-8">
         {/* Logo */}
         <h1 className="text-4xl font-extrabold text-purple-400">To-Do App</h1>
@@ -68,10 +171,12 @@ function TaskListPage() {
             <div className="w-10 h-10 rounded-full">
               <FaRegCircleUser className="w-full h-full" />
             </div>
-        
+
             <div>
-              <span className="text-lg font-medium block">John Doe</span>
-              <span className="text-sm text-gray-400 block">johndoe@example.com</span>
+              <span className="text-lg font-medium block">{profile.name}</span>
+              <span className="text-sm text-gray-400 block">
+                {profile.email}
+              </span>
             </div>
           </div>
 
@@ -81,7 +186,7 @@ function TaskListPage() {
               <ul className="py-2 px-4">
                 <li
                   className="plx-6 py-2 hover:bg-gray-700 cursor-pointer"
-                  onClick={() => console.log('Profile clicked')}
+                  onClick={() => console.log("Profile clicked")}
                 >
                   Profile
                 </li>
@@ -97,7 +202,7 @@ function TaskListPage() {
         </div>
       </header>
 
-      {/* Task Input  */}
+      {/* Task Input */}
       <div className="w-full max-w-4xl flex items-center my-8">
         <input
           type="text"
@@ -116,19 +221,19 @@ function TaskListPage() {
 
       {/* Task List */}
       <ul className="w-full max-w-4xl space-y-4">
-        {tasks.map((task, index) => (
+        {tasks.map((task) => (
           <li
-            key={index}
+            key={task._id}
             className="flex justify-between items-center bg-gray-800 p-4 rounded-lg shadow-md"
           >
             <div className="flex items-center">
               <input
                 type="checkbox"
                 checked={task.completed}
-                onChange={() => toggleComplete(index)}
+                onChange={() => toggleComplete(task._id, task.completed)}
                 className="mr-4 w-5 h-5 text-purple-600 focus:ring-purple-500"
               />
-              {editingIndex === index ? (
+              {editingTaskId === task._id ? (
                 <input
                   type="text"
                   value={editingText}
@@ -138,15 +243,15 @@ function TaskListPage() {
               ) : (
                 <span
                   className={`${
-                    task.completed ? 'line-through text-gray-500' : ''
+                    task.completed ? "line-through text-gray-500" : ""
                   } text-lg`}
                 >
-                  {task.text}
+                  {task.title}
                 </span>
               )}
             </div>
             <div className="flex space-x-4">
-              {editingIndex === index ? (
+              {editingTaskId === task._id ? (
                 <button
                   onClick={saveEdit}
                   className="text-green-500 hover:text-green-600 transition"
@@ -155,14 +260,14 @@ function TaskListPage() {
                 </button>
               ) : (
                 <button
-                  onClick={() => startEditing(index)}
+                  onClick={() => startEditing(task._id, task.title)}
                   className="text-blue-500 hover:text-blue-600 transition"
                 >
                   <FaEdit />
                 </button>
               )}
               <button
-                onClick={() => deleteTask(index)}
+                onClick={() => deleteTask(task._id)}
                 className="text-red-600 hover:text-red-700 transition"
               >
                 <FaTrash />
